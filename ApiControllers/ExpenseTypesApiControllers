@@ -1,0 +1,69 @@
+namespace RetgridCode.Web.Controllers.Api
+{
+    [RoutePrefix("api/ExpenseTypes")]
+    public class ExpenseTypesApiController : ApiController
+    {
+        IExpenseTypesService _expenseTypesService;
+
+        public ExpenseTypesApiController(IExpenseTypesService expenseTypesService)
+        {
+            _expenseTypesService = expenseTypesService;
+        }
+
+        [Route, HttpPost]
+        public HttpResponseMessage AddExpenseTypes(ExpenseTypesAddRequest model)
+        {
+            if (!ModelState.IsValid && model != null)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
+
+            int id = _expenseTypesService.Insert(model);
+
+            ItemResponse<int> response = new ItemResponse<int>();
+            response.Item = id;
+
+            return Request.CreateResponse(HttpStatusCode.OK, response);
+        }
+
+        [Route("Edit"), HttpPut]
+        public HttpResponseMessage UpdateExpenseTypes(ExpenseTypesUpdateRequest model)
+        {
+            if (!ModelState.IsValid)
+            {
+                return Request.CreateErrorResponse(HttpStatusCode.BadRequest, ModelState);
+            }
+            _expenseTypesService.Update(model);
+            SuccessResponse response = new SuccessResponse();
+            return Request.CreateResponse(HttpStatusCode.OK, response);
+        }
+
+
+        [Route, HttpGet]
+        public HttpResponseMessage GetAll(ExpenseDoc list)
+        {
+            ItemsResponse<ExpenseDoc> response = new ItemsResponse<ExpenseDoc>();
+            response.Items = _expenseTypesService.GetAll();
+            return Request.CreateResponse(HttpStatusCode.OK, response);
+        }
+
+
+        [Route("{id:int}"), HttpGet]
+        public HttpResponseMessage GetById(int id)
+        {
+            ItemResponse<ExpenseDoc> response = new ItemResponse<ExpenseDoc>();
+            response.Item = _expenseTypesService.GetById(id);
+            return Request.CreateResponse(HttpStatusCode.OK, response);
+        }
+
+
+        [Route("{id:int}"), HttpDelete]
+        public HttpResponseMessage Delete(int id)
+        {
+            _expenseTypesService.Delete(id);
+
+            SuccessResponse response = new SuccessResponse();
+            return Request.CreateResponse(HttpStatusCode.OK, response);
+        }
+    }
+}
