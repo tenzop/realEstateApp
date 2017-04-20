@@ -1,0 +1,340 @@
+
+@model retgrid.Web.Models.ViewModels.BaseViewModel
+@{
+    ViewBag.Title = "Index";
+    Layout = "~/Views/Shared/_LayoutSmarty.cshtml";
+}
+
+<head>
+    <style>
+        #addBtn {
+            float: right;
+        }
+
+        .inputBox {
+            width: 160px;
+            height: 35px;
+        }
+
+        .pagination {
+            position: absolute;
+            right: 15%;
+            margin-right: 200px;
+        }
+
+        #headText {
+            text-align: center;
+        }
+    </style>
+</head>
+
+
+<section class="page-header page-header-xs">
+    <div class="container">
+
+        <!-- breadcrumbs -->
+        <ol class="breadcrumb breadcrumb-inverse">
+            <li><a href="/">Home</a></li>
+            <li class="active">To Dos</li>
+        </ol><!-- /breadcrumbs -->
+
+    </div>
+</section>
+
+<h2 id="headText">To Dos</h2>
+
+
+<div class="container" ng-controller="toDosController as toDosCtrl">
+    <div class="col-md-12">
+        <div class="panel-heading panel-heading-transparent">
+            <strong>{{toDosCtrl.myMessage}}</strong>
+        </div>
+
+        <div class="col-md-2 col-sm-2 col-md-pull-2 col-sm-pull-2">
+            <h4>FILTERS</h4>
+            <form>
+
+                <label class="size-12 margin-top-10">Case: </label>
+                <select class="form-control inputBox" ng-options="case.id as case.caseName for case in toDosCtrl.cases" ng-change="toDosCtrl.getListingsByCaseId(toDosCtrl.caseId); toDosCtrl.selectedCaseId= toDosCtrl.caseId;" ng-model="toDosCtrl.caseId">
+                    <option value="">Any Case</option>
+                </select>
+
+                <label class="size-12 margin-top-10">Listing: </label>
+                <select class="form-control inputBox" ng-options="listing.id as listing.listing.addressLine1+ ' (' + listing.listing.mlsListingId + ')' for listing in toDosCtrl.listings" ng-model="toDosCtrl.listingId">
+                    <option value="">Any Listing</option>
+                </select>
+
+
+                <label class="size-12 margin-top-10">Priority: </label>
+                <input class="inputBox" ng-model="toDosCtrl.priority" maxlength="1" />
+
+
+                <label class="size-12 margin-top-10">Status Name: </label>
+                <input class="inputBox" ng-model="toDosCtrl.toDosStatusName" maxlength="30" />
+
+                <label class="size-12 margin-top-10">From Date: </label>
+                <input class="inputBox" type="date" ng-model="toDosCtrl.fromDate" />
+
+                <label class="size-12 margin-top-10">To Date: </label>
+                <input class="inputBox" type="date" ng-model="toDosCtrl.toDate" />
+                <br />
+                <br />
+
+                <button class="btn btn-primary" ng-click="toDosCtrl.search()">Search</button>
+            </form>
+        </div>
+
+
+        <div class="table-responsive">
+            <table class="table table-bordered nomargin">
+                <thead>
+                    <tr>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'title'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Title
+                                <span ng-show="toDosCtrl.sortType == 'title' && !toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'title' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'message'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Message
+                                <span ng-show="toDosCtrl.sortType == 'message' && !toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'message' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'dueDate'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Due Date
+                                <span ng-show="toDosCtrl.sortType == 'dueDate' && !toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'dueDate' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'firstName' + 'lastName'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Person
+                                <span ng-show="toDosCtrl.sortType == 'firstName' + ' ' + 'lastName' && !toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'firstName' + ' ' + 'lastName' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'mlsListingId'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Listing
+                                <span ng-show="toDosCtrl.sortType == 'mlsListingId' &&!toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'mlsListingId' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'caseName'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Case
+                                <span ng-show="toDosCtrl.sortType == 'caseName' && !toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'caseName' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'priority'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Priority
+                                <span ng-show="toDosCtrl.sortType == 'priority' && !toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'priority' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <a href="#" ng-click="toDosCtrl.sortType = 'toDosStatusName'; toDosCtrl.sortReverse = !toDosCtrl.sortReverse">
+                                <i></i> Status
+                                <span ng-show="toDosCtrl.sortType == 'toDosStatusName' && !toDosCtrl.sortReverse" class="fa fa-caret-down"></span>
+                                <span ng-show="toDosCtrl.sortType == 'toDosStatusName' && toDosCtrl.sortReverse" class="fa fa-caret-up"></span>
+                            </a>
+                        </th>
+                        <th>
+                            <i></i> Edit
+
+                        </th>
+                        <th>
+                            <i></i> Delete
+                        </th>
+                    </tr>
+                </thead>
+                <tbody id="tableContent">
+                    <tr ng-repeat="toDo in toDosCtrl.items | orderBy : toDosCtrl.sortType : toDosCtrl.sortReverse">
+                        @*<td>
+                                {{toDo.id}}
+                            </td>*@
+                        <td>
+                            {{toDo.title}}
+                        </td>
+                        <td>
+                            {{toDo.message}}
+                        </td>
+                        <td>
+                            {{toDo.dueDate | date:"MM/dd/yyyy"}}
+                        </td>
+                        <td>
+                            {{toDo.person.firstName + " " + toDo.person.lastName}}
+                        </td>
+                        <td>
+                            {{toDo.mlsListingId}}
+                        </td>
+                        <td>
+                            {{toDo.caseName}}
+                        </td>
+                        <td>
+                            {{toDo.priority}}
+                        </td>
+                        <td>
+                            {{toDo.toDosStatusName}}
+                        </td>
+
+                        <td>
+                            <a ng-click="toDosCtrl.edit(toDo)" class="btn btn-default btn-xs edit"><i class="fa fa-edit white"></i> Edit </a>
+                        </td>
+
+                        <td>
+                            <a href="#" ng-click="toDosCtrl.delete(toDo)" class="btn btn-danger btn-xs delete"><i class="fa fa-trash"></i> Delete </a>
+                        </td>
+
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <!--Pagination-->
+        @*<div class="row">
+                <div class="col-xs-4"></div>
+                <div class="col-xs-4 pageBtn">
+                    <ul uib-pagination ng-model="toDosCtrl.pagination.currentPage" items-per-page="toDosCtrl.pagination.itemsPerPage" total-items="toDosCtrl.pagination.totalItems" ng-click="toDosCtrl.search()" maxSize="{{toDosCtrl.pagination.maxPaginationButtons}}"></ul>
+                </div>
+                <div class="col-xs-2"></div>
+            </div>*@
+        <!--Pagination End-->
+        <br />
+        <br />
+        <!-- Pagination Default -->
+        <ul class="pagination">
+            <li><a href="#">&laquo;</a></li>
+            <li class="active"><a href="#">1</a></li>
+            <li><a href="#">2</a></li>
+            <li><a href="#">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li><a href="#">&raquo;</a></li>
+        </ul>
+        <!-- /Pagination Default -->
+        <div id="addBtn">
+            <btn class="btn btn-3d btn-teal btn-lg margin-top-10 create" ng-click="toDosCtrl.create()"><i class="fa fa-plus white"></i> Add To Do </btn>
+        </div>
+
+    </div>
+
+    <div class="col-md-12">
+        <div class="panel panel-default" ng-show="toDosCtrl.selectedItem">
+            <div class="panel-heading">Add/Edit To Do</div>
+            <div class="panel-body">
+                <form name="createToDoForm" data-ng-submit="toDosCtrl.submitForm(createToDoForm.$valid)" novalidate>
+                    <fieldset>
+                        <div class="row">
+                            <div class="form-group" ng-class="{'has-error' : createToDoForm.title.$invalid && !createToDoForm.title.$pristine }">
+                                <div class="col-md-12 col-sm-12">
+                                    <label>Title *</label>
+                                    <input type="text" ng-model="toDosCtrl.selectedItem.title" name="title" data-ng-minlength="2" data-ng-maxlength="50" placeholder="Enter a Title" value="" class="form-control" required>
+                                    <p data-ng-show="createToDoForm.title.$invalid && !createToDoForm.title.$pristine" class="help-block">Title is required.</p>
+                                    <p data-ng-show="createToDoForm.title.$error.minlength" class="help-block">Title is too short </p>
+                                    <p data-ng-show="createToDoForm.title.$error.maxlength" class="help-block">Title is too long </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group" ng-class="{'has-error' : createToDoForm.message.$invalid && !createToDoForm.message.$pristine }">
+                                <div class="col-md-12 col-sm-12">
+                                    <label>Message *</label>
+                                    <input type="text" ng-model="toDosCtrl.selectedItem.message" placeholder="Enter a Message" name="message" value="" class="form-control" required>
+                                    <p data-ng-show="createToDoForm.message.$invalid && !createToDoForm.message.$pristine" class="help-block">Message is required.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group" ng-class="{'has-error' : createToDoForm.dueDate.$invalid && !createToDoForm.dueDate.$pristine }">
+                                <div class="col-md-12 col-sm-12">
+                                    <label>Due Date *</label>
+                                    <input type="text" ng-model="toDosCtrl.selectedItem.dueDate" class="form-control datepicker" name="dueDate" data-date="" data-format="yyyy-mm-dd" data-lang="en" placeholder="Select a date" data-RTL="false" required>
+                                    <p data-ng-show="createToDoForm.dueDate.$invalid && !createToDoForm.dueDate.$pristine" class="help-block">Pick a Due Date.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-md-12 col-sm-12">
+                                    <label>Listing Id</label>
+                                    <input type="text" ng-model="toDosCtrl.selectedItem.listingId" name="listingId" placeholder="Enter a Listing Id" value="" class="form-control">
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="form-group">
+                                <div class="col-md-12 col-sm-12">
+                                    <label>Case Id</label>
+                                    <input type="text" ng-model="toDosCtrl.selectedItem.caseId" name="caseId" placeholder="Enter a Case Id" value="" class="form-control">
+                                </div>
+                            </div>
+
+                        </div>
+                        <div class="row">
+                            <div class="form-group" ng-class="{'has-error' : createToDoForm.priority.$invalid && !createToDoForm.priority.$pristine }">
+                                <div class="col-md-12 col-sm-12">
+                                    <label>Priority *</label>
+                                    <input type="text" ng-model="toDosCtrl.selectedItem.priority" name="priority" placeholder="Enter a Priority" value="" class="form-control" required>
+                                    <p data-ng-show="createToDoForm.priority.$invalid && !createToDoForm.priority.$pristine" class="help-block">Priority is required.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="form-group" ng-class="{'has-error' : createToDoForm.statusId.$invalid && !createToDoForm.statusId.$pristine }">
+                                <div class="col-md-12 col-sm-12">
+                                    <label>Status Id *</label>
+                                    <input type="text" ng-model="toDosCtrl.selectedItem.statusId" name="statusId" placeholder="Enter a Status Id" value="" class="form-control" required>
+                                    <p data-ng-show="createToDoForm.statusId.$invalid && !createToDoForm.statusId.$pristine" class="help-block">Status Id is required.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-xs-4">
+                                <div class="btn-group pull-left">
+                                    <a href="#" ng-show="toDosCtrl.selectedItem.id" ng-click="toDosCtrl.delete()" class="btn btn-danger"><i class="fa fa-times"></i>Delete</a>
+                                </div>
+                            </div>
+
+                            <div class="col-xs-8">
+                                <div class="btn-group pull-right">
+                                    <a href="#" ng-click="toDosCtrl.cancel()" class="btn btn-default "><i class="fa fa-undo"></i>Cancel</a>
+                                    <a href="#" ng-click="toDosCtrl.save()" class="btn btn-success"><i class="fa fa-save"></i>Save</a>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@section scripts
+{
+    <script src="~/Scripts/retgrid.services.toDos.js"></script>
+    <script src="~/Scripts/app/services/toDos.js"></script>
+    <script src="~/Scripts/app/shared/toDos.controller.js"></script>
+    <script src="~/Scripts/retgrid.services.case.js"></script>
+    <script src="~/Scripts/app/services/case.js"></script>
+    <script src="~/Scripts/retgrid.services.caseproperty.js"></script>
+    <script src="~/Scripts/app/services/caseProperty.js"></script>
+    <script>
+
+        // put entire page model in retgrid.page.model
+        retgrid.page.model = @Html.RawJson(Model);
+
+    </script>
+} 
