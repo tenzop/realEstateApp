@@ -1,0 +1,334 @@
+@{
+    ViewBag.Title = "Create";
+    Layout = "~/Views/Shared/_LayoutSmartyAdmin.cshtml";
+}
+
+<header id="page-header">
+    <h1>Expense Types</h1>
+    <ol class="breadcrumb">
+        <li><a href="#">Pages</a></li>
+        <li class="active">Expense Types</li>
+    </ol>
+</header>
+
+
+
+<!--Added a new form-->
+<div id="content" class="padding-20" ng-controller="expenseTypesController as expTypesCtrl">
+
+    <div class="row">
+
+        <div class="col-md-4">
+
+            <!-- ------ -->
+            <div class="panel panel-default">
+                <div class="panel-heading panel-heading-transparent">
+                    <strong>{{expTypesCtrl.myMessage}}</strong>
+                </div>
+
+                <div class="panel-body">
+                    <button type="button" class="btn btn-3d btn-teal btn-xlg margin-top-10 create" ng-hide="expTypesCtrl.selectedItem" ng-click="expTypesCtrl.create()">Add New Expense Type</button>
+                    <form name="createExpenseTypeForm" ng-show="expTypesCtrl.selectedItem" data-ng-submit="expTypesCtrl.submitForm(createExpenseTypeForm.$valid)" novalidate>
+                        <fieldset>
+                            <!-- required [php action request] -->
+                            <input type="hidden" name="action" value="contact_send" />
+
+                            <div class="row">
+                                <div class="form-group" ng-class="{'has-error' : createExpenseTypeForm.name.$invalid && !createExpenseTypeForm.name.$pristine }">
+                                    <div class="col-md-9 col-sm-9">
+                                        <label>Type Name *</label>
+                                        <input type="text" ng-model="expTypesCtrl.selectedItem.name" name="name" data-ng-minlength=1 placeholder="Enter a Expense Type" value="" class="form-control" required>
+                                        <p data-ng-show="createExpenseTypeForm.name.$invalid && !createExpenseTypeForm.name.$pristine" class="help-block">Type Name is required.</p>
+                                        <p data-ng-show="createExpenseTypeForm.name.$error.minlength" class="help-block">Type Name is required.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group" ng-class="{'has-error' : createExpenseTypeForm.code.$invalid && !createExpenseTypeForm.code.$pristine }">
+                                    <div class="col-md-9 col-sm-9">
+                                        <label>DB Code *</label>
+                                        <input type="text" ng-model="expTypesCtrl.selectedItem.code" data-ng-maxlength="10" placeholder="Enter a Code" name="code" value="" class="form-control" required>
+                                        <p data-ng-show="createExpenseTypeForm.code.$invalid && !createExpenseTypeForm.code.$pristine" class="help-block">Code is required.</p>
+                                        <p data-ng-show="createExpenseTypeForm.code.$error.maxlength" class="help-block">The maximum length for a name is 10 characters.</p>
+                                    </div>
+                                </div>
+
+                            </div>
+
+                            <div class="row">
+                                <div class="form-group" ng-class="{'has-error' : createExpenseTypeForm.displayOrder.$invalid && !createExpenseTypeForm.displayOrder.$pristine }">
+                                    <div class="col-md-9 col-sm-9">
+                                        <label>Display Order *</label>
+                                        <input type="number" ng-model="expTypesCtrl.selectedItem.displayOrder" placeholder="Enter a Display Order" name="displayOrder" value="" class="form-control" required>
+                                        <p data-ng-show="createExpenseTypeForm.displayOrder.$invalid && !createExpenseTypeForm.displayOrder.$pristine" class="help-block">Display Order must be a number.</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 col-sm-6">
+                                    <label>Active/Inactive *</label>
+                                    <div>
+                                        <label class="switch switch-default switch-round">
+                                            <input type="checkbox" ng-model="expTypesCtrl.selectedItem.inactive" name="inactive" checked="">
+                                            <span class="switch-label" data-on="YES" data-off="NO"></span>
+
+                                        </label>
+                                    </div>
+                                </div>
+
+                            </div>
+                            <div>
+                                <span class="col-md-4">
+                                    <button type="submit" class="btn btn-success" ng-disabled="createExpenseTypeForm.$invalid">SUBMIT</button>
+                                </span>
+                            </div>
+
+                        </fieldset>
+
+                    </form>
+
+                </div>
+
+            </div>
+            <!-- /----- -->
+
+        </div>
+        <div class="col-md-8">
+            <div id="panel-1" class="panel panel-default">
+                <div class="panel-heading">
+                    <span class="title elipsis">
+                        <strong>EXPENSE TYPES</strong> <!-- panel title -->
+                    </span>
+
+                    <!-- right options -->
+                    <ul class="options pull-right list-inline">
+                        <li><a href="#" class="opt panel_colapse" data-toggle="tooltip" title="Colapse" data-placement="bottom"></a></li>
+                        <li><a href="#" class="opt panel_fullscreen hidden-xs" data-toggle="tooltip" title="Fullscreen" data-placement="bottom"><i class="fa fa-expand"></i></a></li>
+                        <li><a href="#" class="opt panel_close" data-confirm-title="Confirm" data-confirm-message="Are you sure you want to remove this panel?" data-toggle="tooltip" title="Close" data-placement="bottom"><i class="fa fa-times"></i></a></li>
+                    </ul>
+                    <!-- /right options -->
+
+                </div>
+                <div class="panel-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered nomargin">
+                            <thead>
+                                <tr>
+                                    @*<th>Id</th>*@
+                                    <th>Name</th>
+                                    <th>Code</th>
+                                    <th>Display Order</th>
+                                    <th>Active/Inactive</th>
+                                    <th>Edit</th>
+                                    <th>Delete</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tableBody">
+                                <tr ng-repeat="(key, expTypes) in expTypesCtrl.items track by key">
+                                    @*<td>
+                                            {{expTypes.id}}
+                                        </td>*@
+                                    <td>
+                                        <a ng-click="expTypesCtrl.edit(expTypes)">{{expTypes.name}}</a>
+                                    </td>
+                                    <td>
+                                        {{expTypes.code}}
+                                    </td>
+                                    <td>
+                                        {{expTypes.displayOrder}}
+                                    </td>
+                                    <td>
+                                        {{expTypes.inactive}}
+                                    </td>
+                                    <td>
+                                        <a href="#" ng-click="expTypesCtrl.edit(expTypes)" class="btn btn-default btn-xs edit"><i class="fa fa-edit white"></i> Edit </a>
+                                    </td>
+                                    <td>
+                                        <a href="#" ng-click="expTypesCtrl.delete(key, expTypes)" class="btn btn-danger btn-xs delete"><i class="fa fa-trash"></i> Delete </a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+
+
+@section Scripts{
+    <script src="~/Scripts/jquery.validate.min.js"></script>
+    <script src="~/Scripts/retgrid.services.expenseTypes.js"></script>
+
+
+
+    <script>
+
+        (function () {
+            "use strict";
+
+            angular.module(APPNAME)
+                       .factory('expenseTypesService', ExpenseTypesServiceFactory);
+
+            ExpenseTypesServiceFactory.$inject = ['$baseService', '$retgrid'];
+
+            function ExpenseTypesServiceFactory($baseService, $retgrid) {
+
+                var aretgridServiceObject = retgrid.services.expenseTypes;
+
+                var newService = $baseService.merge(true, {}, aretgridServiceObject, $baseService);
+
+                console.log("expenseTypesService", aretgridServiceObject);
+
+                return newService;
+            }
+
+        })();
+
+        (function () {
+            "use strict";
+
+            angular.module(APPNAME)
+                .controller('expenseTypesController', ExpenseTypesController);
+
+            ExpenseTypesController.$inject = ['$scope', '$baseController', 'expenseTypesService'];
+
+            function ExpenseTypesController($scope, $baseController, expenseTypesService) {
+
+                var vm = this;
+                $baseController.merge(vm, $baseController);
+                vm.$scope = $scope;
+                vm.expenseTypesService = expenseTypesService;
+                vm.notify = vm.expenseTypesService.getNotifier($scope);
+
+                vm.myMessage = "Add New Expense Type";
+                vm.changeMessage = _changeMessage;
+                vm.items = [];
+                vm.selectedItem = null;
+                vm.selectedKey = null;
+                vm.edit = _edit;
+                vm.save = _save;
+                vm.delete = _delete;
+                vm.create = _create;
+                vm.submitForm = _submitForm;
+
+                render();
+
+                //GETALL
+                function render() {
+                    vm.expenseTypesService.getExpenseTypes(_onGetAllSuccess, _onGetAllError)
+                }
+
+                function _changeMessage() {
+                    vm.myMessage = "Changed my message with a click";
+                }
+                function _onGetAllSuccess(data) {
+                    vm.notify(function () {
+                        vm.items = data.items;
+                    });
+                }
+
+                function _onGetAllError(jqXHR) {
+                    console.log(jqXHR.responseText);
+                }
+
+                //EDIT
+                function _edit(item) {
+                    vm.expenseTypesService.getExpenseTypesById(item.id, _onGetByIdSuccess, _onGetByIdError)
+                }
+                function _onGetByIdSuccess(data) {
+                    vm.notify(function () {
+                        vm.selectedItem = data.item;
+
+                    });
+                }
+                function _onGetByIdError(jqXHR) {
+                    console.log(jqXHR.responseText);
+                }
+
+                //SAVE
+                function _save() {
+                    //edit
+                    if (vm.selectedItem && vm.selectedItem.id) {
+                        vm.expenseTypesService.put(vm.selectedItem, _onPutSuccess, _onPutError);
+                        console.log("Successfully Saved");
+                    } else {
+                        //create
+                        vm.expenseTypesService.insert(vm.selectedItem, _onInsertSuccess, _onInsertError);
+                        console.log("Successfully Inserted");
+                    }
+                }
+                function _onPutSuccess(data) {
+                    vm.notify(function () {
+                        vm.selectedItem = null;
+                        render();
+                    });
+                }
+
+                function _onPutError(jqXHR) {
+                    console.log(jqXHR.responseText);
+                }
+
+                //CREATE TO MAKE THE ADD EXPENSE TYPE BUTTON WORK
+                function _create() {
+                    //vm.expenseTypesService.insert(vm.newExpenseTypes, _onInsertSuccess, _onInsertError);
+                    vm.selectedItem = {};
+                    console.log("Created!!!");
+                }
+
+                //INSERT NEW EXPENSE IN THE FORM
+                function _insert() {
+                    vm.expenseTypesService.insert(vm.selectedItem, _onInsertSuccess, _onInsertError);
+                    console.log("Successfully Inserted");
+                };
+                function _onInsertSuccess(data) {
+                    console.log(data);
+                    vm.notify(function () {
+                        vm.selectedItem = null;
+                        render();
+                    });
+                }
+                function _onInsertError(jqXHR) {
+                    console.log(jqXHR.responseText);
+                }
+
+
+                //DELETE
+                function _delete(key, item) {
+                    vm.selectedKey = key;
+                    vm.expenseTypesService.delete(item.id, _onDeleteSuccess, _onDeleteError)
+
+                }
+                function _onDeleteSuccess(data) {
+                    vm.notify(function () {
+                        vm.items.splice(vm.selectedKey, 1);
+                    });
+                    console.log("delete success");
+                };
+                function _onDeleteError(jqXHR) {
+                    console.log(jqXHR.responseText);
+                }
+
+                //FORM VALIDATION
+                function _submitForm(isValid) {
+                    if (isValid) {
+                        console.log("data is valid! go save this object -> ");
+                        vm.save();
+                    } else {
+                        console.log("form submitted with invalid data :(")
+                    }
+                }
+
+            }
+
+        })();
+
+
+    </script>
+}
