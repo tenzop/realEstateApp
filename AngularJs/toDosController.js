@@ -4,9 +4,9 @@
     angular.module(APPNAME)
         .controller('toDosController', ToDosController);
 
-    ToDosController.$inject = ['$scope', '$baseController', 'toDosService', '$sabio', 'caseService', 'casePropertyService', 'orderByFilter'];
+    ToDosController.$inject = ['$scope', '$baseController', 'toDosService', '$retgrid', 'caseService', 'casePropertyService', 'orderByFilter'];
 
-    function ToDosController($scope, $baseController, toDosService, $sabio, caseService, casePropertyService, orderByFilter) {
+    function ToDosController($scope, $baseController, toDosService, $retgrid, caseService, casePropertyService, orderByFilter) {
 
         var vm = this;
         $baseController.merge(vm, $baseController);
@@ -17,7 +17,7 @@
         vm.notify = vm.toDosService.getNotifier($scope);
 
         // Get current user id from BaseViewModel
-        vm.currentUserId = $sabio.model.currentUserId;
+        vm.currentUserId = $retgrid.model.currentUserId;
 
         vm.fromDate = null;
         vm.toDate = null;
@@ -66,9 +66,9 @@
                 // parent scope restricts caseId, if it defines caseId
                 vm.caseId = vm.$scope.$parent.caseId;
             }
-            else if ($sabio.model.currentUser && $sabio.model.currentUser.primaryCase) {
+            else if ($retgrid.model.currentUser && $retgrid.model.currentUser.primaryCase) {
                 // otherwise, BaseViewModel restricts caseId,
-                vm.caseId = $sabio.model.currentUser.primaryCase;
+                vm.caseId = $retgrid.model.currentUser.primaryCase;
             }
 
             if (vm.$scope.$parent && vm.$scope.$parent
@@ -76,8 +76,8 @@
                 // parent scope restricts listingId, if it defines listingId
                 vm.listingId = vm.$scope.$parent.listingId;
             }
-            if (vm.$sabio.model.item && vm.$sabio.model.item.id) {
-                vm.toDosId = vm.$sabio.model.item.id;
+            if (vm.$retgrid.model.item && vm.$retgrid.model.item.id) {
+                vm.toDosId = vm.$retgrid.model.item.id;
                 vm.toDosService.getToDosById(vm.toDosId, _onGetByIdSuccess, _onGetByIdError);
             }
             else {
