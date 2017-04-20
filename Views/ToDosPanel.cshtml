@@ -1,0 +1,84 @@
+<head>
+    <style>
+        .noBullets {
+            list-style-type: none;
+        }
+
+        #scrollBar {
+            overflow: auto;
+            height: 800px;
+            width: 240px;
+        }
+    </style>
+</head>
+
+<div id="sidepanel" class="sidepanel-light">
+    <div class="padding-15 pull-left">
+        <a href="#" ng-if="ctrlToDo.onAgentDashboard" ng-click="ctrlToDo.pinToDashboard()">
+            <i class="fa fa-thumb-tack fa-rotate-90"></i>
+        </a>
+    </div>
+
+    <a id="sidepanel_close" href="#">
+        <i class="glyphicon glyphicon-remove"></i>
+    </a>
+
+    <div class="sidepanel-content">
+        <h2 class="sidepanel-title margin-bottom-8">To-Do's</h2>
+
+
+        <!--------------------------------------------------------------------- SORT ----------------------------------------------------------------------------------------->
+        <div>
+            <strong> Sort By:</strong> ({{ctrlToDo.items.length}})
+
+            <ul class="nav nav-tabs padding-bottom-0">
+                <li>
+                    <!-- Alpha Sort -->
+                    <a href="#ttab1_nobg" data-toggle="tab" aria-expanded="false" ng-click="ctrlToDo.sortBy('title')"><i class="fa fa-sort-alpha-asc" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <!-- Date Sort -->
+                    <a href="#ttab2_nobg" data-toggle="tab" aria-expanded="true" ng-click="ctrlToDo.sortBy('dueDate')"><i class="fa fa-calendar-o" aria-hidden="true"></i></a>
+                </li>
+                <li>
+                    <!-- Custom Sort (drag and drop) -->
+                    <a href="#ttab2_nobg" data-toggle="tab" aria-expanded="true"><i class="fa fa-random" aria-hidden="true" ng-click="ctrlToDo.sortBy('dateCreated')"></i></a>
+                </li>
+            </ul>
+        </div>
+
+
+
+        <!------------------------------------------------------------------ TODOS CURRENT----------------------------------------------------------------------------------------->
+        <div id="scrollBar">
+
+            <h4>Incomplete</h4>
+            <ul class="list-group list-group-bordered list-group-noicon uppercase" ng-repeat="item in ctrlToDo.items | filter: {'statusId' :  1 }">
+                <li class="list-group-item">
+                    <a class="dropdown-toggle" href="#"><b>{{item.title}}</b></a>
+                    <ul>
+                        <li><a><span class="size-11 text-muted pull-right"></span> {{item.message}}</a></li>
+                        <li><a><span class="size-11 text-muted pull-right"></span> Due Date-{{item.dueDate| date:"yyyy/MM/dd"}}</a></li>
+                        <!--<li style="list-style-type: none;"><button><a href="/todos/{{item.id}}/edit/" class="btn btn-amber btn-xs white  margin-right-8"><i class="fa fa-edit"></i>Edit</a></button></li>-->
+                        <li class="noBullets"><a href="/todos/{{item.id}}/edit/"><button class="btn btn-amber btn-xs white  margin-right-8"><i class="fa fa-edit"></i>Edit</button></a></li>
+                        <!--<li style="list-style-type: none;"><button ng-click="ctrlToDo.edit(item)" class="btn btn-amber btn-xs white  margin-right-8"><i class="fa fa-edit"></i>Edit</button></li>-->
+                        <li class="padding-top-10 padding-bottom-10 noBullets"><button ng-click="ctrlToDo.markAsComplete(item)" class="btn btn-success btn-xs white"><i class="fa fa-check-square-o" aria-hidden="true"></i>Mark as complete.</button></li>
+                        <!--<li style="list-style-type: none;" class="padding-top-10 padding-bottom-10"><button ng-click="ctrlToDo.addNewToDo(item)" class="btn btn-success btn-xs white"><i class="fa fa-check-square-o" aria-hidden="true"></i>Add a New To Do.</button></li>-->
+                    </ul>
+                </li>
+            </ul>
+            <!------------------------------------------------------------------- TODOS COMPLETED----------------------------------------------------------------------------------------->
+            <h4>Recently Completed</h4>
+            <ul class="list-group list-group-bordered list-group-noicon uppercase" ng-repeat="item in ctrlToDo.items | filter: {'statusId' : 3}">
+                <li class="list-group-item">
+                    <a class="dropdown-toggle" href="#"><b>{{item.title}}</b></a>
+                    <ul>
+                        <li><a><span class="size-11 text-muted pull-right"></span>{{item.message}}</a></li>
+                        <li><a><span class="size-11 text-muted pull-right"></span> Due Date-{{item.dueDate | date:"yyyy/MM/dd"}}</a></li>
+                        <li style="list-style-type: none;" class="pading-top-10 padding-bottom-10"><button ng-click="ctrlToDo.markAsInComplete(item)" class="btn btn-info btn-xs white"><i class="fa fa-square-o" aria-hidden="true"></i>Mark as incomplete.</button></li>
+                    </ul>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
