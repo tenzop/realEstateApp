@@ -1,0 +1,199 @@
+namespace RetgridCode.Web.Services
+{
+    public class ToDosService : BaseService, IToDosService
+    {
+        public int Insert(ToDosAddRequest model)
+        {
+            string userId = UserService.GetCurrentUserId();
+            int Id = 0;
+            DataProvider.ExecuteNonQuery(GetConnection, "dbo.ToDos_Insert",
+                inputParamMapper: delegate (SqlParameterCollection paramCollection)
+                {
+                    paramCollection.AddWithValue("@Title", model.Title);
+                    paramCollection.AddWithValue("@Message", model.Message);
+                    paramCollection.AddWithValue("@DueDate", model.DueDate);
+                    paramCollection.AddWithValue("@PeopleId", model.PeopleId);
+                    paramCollection.AddWithValue("@ListingId", model.ListingId);
+                    paramCollection.AddWithValue("@CaseId", model.CaseId);
+                    paramCollection.AddWithValue("@Priority", model.Priority);
+                    paramCollection.AddWithValue("@StatusId", model.StatusId);
+                    paramCollection.AddWithValue("@UserId", userId);
+                    SqlParameter p = new SqlParameter("@Id", System.Data.SqlDbType.Int);
+                    p.Direction = System.Data.ParameterDirection.Output;
+                    paramCollection.Add(p);
+                }, returnParameters: delegate (SqlParameterCollection param)
+                {
+                    int.TryParse(param["@Id"].Value.ToString(), out Id);
+                }
+               );
+            return Id;
+        }
+
+        public void Update(ToDosUpdateRequest model)
+        {
+            DataProvider.ExecuteNonQuery(GetConnection, "dbo.ToDos_Update"
+               , inputParamMapper: delegate (SqlParameterCollection paramCollection)
+               {
+                   paramCollection.AddWithValue("@Id", model.Id);
+                   paramCollection.AddWithValue("@Title", model.Title);
+                   paramCollection.AddWithValue("@Message", model.Message);
+                   paramCollection.AddWithValue("@DueDate", model.DueDate);
+                   paramCollection.AddWithValue("@PeopleId", model.PeopleId);
+                   if (model.ListingId.HasValue && model.ListingId > 0)
+                   {
+                       paramCollection.AddWithValue("@ListingId", model.ListingId);
+                   }
+                   if (model.CaseId.HasValue && model.CaseId > 0)
+                   {
+                       paramCollection.AddWithValue("@CaseId", model.CaseId);
+                   }
+                   paramCollection.AddWithValue("@Priority", model.Priority);
+                   paramCollection.AddWithValue("@StatusId", model.StatusId);
+                   paramCollection.AddWithValue("@UserId", UserService.GetCurrentUserId());
+               }, returnParameters: null
+               );
+        }
+
+        public List<ToDosDoc> GetAll()
+        {
+            List<ToDosDoc> list = null;
+
+            DataProvider.ExecuteCmd(GetConnection, "dbo.ToDos_SelectAllV2"
+                , inputParamMapper: null, map: delegate (IDataReader reader, short set)
+                {
+                    ToDosDoc todos = MapToDosDoc(reader);
+
+                    if (list == null)
+                    {
+                        list = new List<ToDosDoc>();
+                    }
+                    list.Add(todos);
+
+                }
+
+                );
+            return list;
+        }
+
+  
+
+        public ToDosDoc GetById(int id)
+        {
+            ToDosDoc todos = null;
+            DataProvider.ExecuteCmd(GetConnection, "dbo.ToDos_SelectByIdV2"
+                , inputParamMapper: delegate (SqlParameterCollection paramCollection)
+                {
+
+                    paramCollection.AddWithValue("@Id", id);
+
+                }, map: delegate (IDataReader reader, short set)
+                {
+                    todos = MapToDosDoc(reader);
+
+                }
+
+                );
+            return todos;
+        }
+
+        public List<ToDosDoc> GetByCaseId(int id)
+        {
+            List<ToDosDoc> list = null;
+            DataProvider.ExecuteCmd(GetConnection, "dbo.ToDos_SelectByCaseIdV2"
+                , inputParamMapper: delegate (SqlParameterCollection paramCollection)
+                {
+
+                    paramCollection.AddWithValue("@CaseId", id);
+
+                }, map: delegate (IDataReader reader, short set)
+                {
+                    ToDosDoc todos = MapToDosDoc(reader);
+
+
+                    if (list == null)
+                    {
+                        list = new List<ToDosDoc>();
+                    }
+                    list.Add(todos);
+
+                }
+
+                );
+            return list;
+        }
+
+        public void Delete(int id)
+        {
+            DataProvider.ExecuteNonQuery(GetConnection, "dbo.ToDos_Delete"
+                , inputParamMapper: delegate (SqlParameterCollection param)
+                {
+                    param.AddWithValue("@Id", id);
+                }, returnParameters: null);
+        }
+
+
+        public List<ToDosDoc> Search(ToDosSearchRequest model)
+        {
+            List<ToDosDoc> list = null;
+            DataProvider.ExecuteCmd(GetConnection, "dbo.ToDos_Search",
+                inputParamMapper: delegate (SqlParameterCollection paramCollection)
+                {
+                    paramCollection.AddWithValue("@CurrentUserId", model.CurrentUserId);
+                    paramCollection.AddWithValue("@CaseId", model.CaseId);
+                    paramCollection.AddWithValue("@ListingId", model.ListingId);
+                    paramCollection.AddWithValue("@Priority", model.Priority);
+                    paramCollection.AddWithValue("@ToDosStatusName", model.ToDosStatusName);
+                    paramCollection.AddWithValue("@FromDate", model.FromDate);
+                    paramCollection.AddWithValue("@ToDate", model.ToDate);
+                    paramCollection.AddWithValue("@CurrentPage", model.CurrentPage);
+                    paramCollection.AddWithValue("@ItemsPerPage", model.ItemsPerPage);
+                },
+                map: delegate (IDataReader reader, short set)
+                {
+                    ToDosDoc todos = MapToDosDoc(reader);
+
+                    if (list == null)
+                    {
+                        list = new List<ToDosDoc>();
+                    }
+                    list.Add(todos);
+
+                }
+
+               );
+            return list;
+        }
+
+
+        private static ToDosDoc MapToDosDoc(IDataReader reader)
+        {
+            ToDosDoc todos = new ToDosDoc();
+            int ordPosititon = 0;
+            todos.Id = reader.GetSafeInt32(ordPosititon++);
+            todos.Title = reader.GetSafeString(ordPosititon++);
+            todos.Message = reader.GetSafeString(ordPosititon++);
+            todos.DueDate = reader.GetSafeDateTime(ordPosititon++);
+            PersonBase person = new PersonBase();
+            todos.Person = person;
+            todos.Person.Id = reader.GetSafeInt32(ordPosititon++);
+            todos.ListingId = reader.GetSafeInt32(ordPosititon++);
+            todos.CaseId = reader.GetSafeInt32(ordPosititon++);
+            todos.Priority = reader.GetSafeInt32(ordPosititon++);
+            todos.StatusId = reader.GetSafeInt32(ordPosititon++);
+            todos.DateCreated = reader.GetSafeDateTime(ordPosititon++);
+            todos.DateModified = reader.GetSafeDateTime(ordPosititon++);
+            todos.Person.FirstName = reader.GetSafeString(ordPosititon++);
+            todos.Person.LastName = reader.GetSafeString(ordPosititon++);
+            todos.Person.PhoneCell = reader.GetSafeString(ordPosititon++);
+            todos.Person.PhoneHome = reader.GetSafeString(ordPosititon++);
+            todos.Person.PhoneWork = reader.GetSafeString(ordPosititon++);
+            todos.Person.EmailPublic = reader.GetSafeString(ordPosititon++);
+            todos.ToDosStatusName = reader.GetSafeString(ordPosititon++);
+            todos.ToDosStatusCode = reader.GetSafeString(ordPosititon++);
+            todos.CaseName = reader.GetSafeString(ordPosititon++);
+            todos.MlsListingId = reader.GetSafeString(ordPosititon++);
+
+            return todos;
+        }
+    }
+}
